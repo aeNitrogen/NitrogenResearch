@@ -1,20 +1,20 @@
-# iterate given model, data, optimizer
-import torch
+# iterate given model, data, target data, optimizer, methods, gpu batch size and loss criterion
+import math
 
 
-def single_input_builder(actions, observations):
-    batch = actions.size(0)
-    length = actions.size(1)
-    features = actions.size(2) + observations.size(2)
-    input = torch.zeros((batch, length, features))
-    input[:, :, 0:] = actions
-    input[:, :observations.size(1), actions.size(2):] = observations
-    return input
+def iterate(model, data, target, optimizer, criterion, input_method, output_method, batch_size):
+    # Iteration for training, weights only returned in iteration for evaluation.
+    # Output method should not return weights.
+    # Output cut defined by output method.
+    for i in range(math.ceil(data.size(0) / batch_size)):
+        start = i * batch_size
+        end = min((i + 1) * batch_size, data.size(0))
 
+        def closure():
+            optimizer.zero_grad()
+            output = output_method(model(input_method(data[start:end, :, :]), ))
+            loss = criterion(output, target[start:end, :, :])
+            loss.backward()
+            return loss
 
-def single_input(model, input):
-    output = model(input)
-    return output
-
-def single_output(output):
-    return output
+        optimizer.step(closure)
