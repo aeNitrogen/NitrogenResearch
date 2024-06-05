@@ -1,0 +1,25 @@
+@startuml
+class Car {
+  -make: string
+  -model: string
+  -year: int
+  +start()
+  +stop()
+}
+
+class Iterator {
+  -model: Model
+  -optimizer: optimizer
+  -dataset: Torch.Tensor
+  -device: String
+  +initialize()
+  +iterate()
+  +finalize()
+}
+
+abstract class Model {
+  -config: namespace
+}
+
+
+@enduml
